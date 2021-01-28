@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Štatistiky vakcinácie covid-19 na Slovensku 💉</title>
+  <meta name="og:image" content="https://projects.mravcak.com/covid19-vaccination/page-preview.png">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.8.0/dist/alpine.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dayjs@1.10.4/dayjs.min.js"></script>
+  <style> .table-value { text-align: right; opacity: 0.85; }</style>
+</head>
+
+<body class="bg-dark text-white" x-data="aplineApp()" x-init="loadData()">
+  <header class="p-3 d-flex align-items-center justify-content-between">
+    <h1 class="m-0 h2">Štatistiky vakcinácie covid-19 na Slovensku 💉</h1>
+    <div class="text-right">
+    </div>
+  </header>
+
+  <div class="row no-gutters px-2">
+    <div class="col-md-6 p-2">
+      <div class="p-3 mb-3 shadow-lg bg-white text-dark">
+        <h2 class="h4 mb-3">📈 Aktuálne čísla</h2>
+        <div class="row">
+          <div class="col-sm-6 text-center">
+            <p class="display-4" x-text="formatNumber(getDoseCount(null, null, lastDayOnRecord))"></p>
+            <p>Podaných dávok posledný deň</p>
+          </div>
+          <div class="col-sm-6 text-center">
+            <p class="display-4" x-text="formatNumber(getDoseCount(null, null, getLastDayOnRecordMinusWeek()))"></p>
+            <p>Podaných dávok posledný týždeň</p>
+          </div>
+        </div>
+        <hr>
+        <p class="text-muted text-center">Dáta môžu byť oneskorené.<br> Posledný deň = <code x-text="lastDayOnRecord && lastDayOnRecord.format('D.M.YYYY')"></code>. Posledný týždeň = od <code x-text="getLastDayOnRecordMinusWeek().format('D.M.YYYY')"></code></p> 
+      </div>
+
+      <div class="p-3 mb-3 shadow-lg bg-white text-dark">
+        <h2 class="h4 mb-3">🐌 Cesta k imunite</h2>
+        <p>Cestu ku kolektívnej imunite (zaočkovanosť <strong><span x-text="desiredImmunityPopulationRatio"></span>%</strong>)</strong> sme prešli na: <strong x-text="formatPercent(getTotalProgress())"></strong></p>
+        <div class="progress mb-3">
+          <div class="progress-bar" role="progressbar" :style="`width: ${getTotalProgress() * 100}%`" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
+        <hr>
+        <h3 class="h5 mb-3">Vypočítajte si ďalší vývoj</h3>
+        <form>
+          <div class="form-group row">
+            <label class="col-sm-6 col-form-label">Pri rýchlosti očkovania</label>
+            <div class="col-sm-6">
+              <div class="input-group">
+                <input type="number" class="form-control" x-model="weeklyRate">
+                <div class="input-group-append">
+                  <span class="input-group-text">dávok / týž.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-sm-6 col-form-label">A cieľovej preočkovanosti</label>
+            <div class="col-sm-6">
+              <div class="input-group">
+                <input type="number" class="form-control" x-model="desiredImmunityPopulationRatio">
+                <div class="input-group-append">
+                  <span class="input-group-text">%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-sm-6 col-form-label">Bude imunita dosiahnutá</label>
+            <div class="col-sm-6">
+              <input type="text" class="form-control" disabled :value="getDateOfImmunity().format('D.M.YYYY')">
+            </div>
+          </div>
+        </form>
+      </div>
+    </div> 
+    <div class="col-md-6 p-2">
+      <div class="p-3 mb-3 shadow-lg bg-white text-dark">
+        <h2 class="h4 mb-3">🇸🇰 Celkový stav</h2>
+        <table class="table table-sm table-hover mb-0">
+          <tbody>
+            <tr>
+              <th>Počet zaočkovaných prvou dávkou</th>
+              <td x-text="formatNumber(getTotalDoseFirst())" class="table-value"></td>
+            </tr>
+            <tr>
+              <th>↳ Percent populácie</th>
+              <td x-text="formatPercent(getTotalDoseFirst() / population)" class="table-value"></td>
+            </tr>
+            <tr>
+              <th>↳ Za posledný týždeň</th>
+              <td x-text="formatNumber(getWeeklyDoseFirst())" class="table-value"></td>
+            </tr>
+            <tr>
+              <th>Počet zaočkovaných druhou dávkou</th>
+              <td x-text="formatNumber(getTotalDoseSecond())" class="table-value"></td>
+            </tr>
+            <tr>
+              <th>↳ Percent populácie</th>
+              <td x-text="formatPercent(getTotalDoseSecond() / population)" class="table-value"></td>
+            </tr>
+            <tr>
+              <th>↳ Za posledný týždeň</th>
+              <td x-text="formatNumber(getWeeklyDoseSecond())" class="table-value"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="p-3 mb-3 shadow-lg bg-white text-dark">
+        <h2 class="h4 mb-3">📍 Podľa regiónov</h2>
+        <p>
+          Malým písmom sú uvedené počty za posledný týždeň
+        </p>
+        <div class="table-responsive">
+          <table class="table table-sm table-hover mb-0">
+            <thead>
+              <tr>
+                <th></th>
+                <th class="text-right" colspan="2">Prvá dávka</th>
+                <th class="text-right" colspan="2">Druhá dávka</th>
+              </tr>
+            </thead>
+            <tbody>
+              <template x-for="region in regions" :key="region">
+                <tr>
+                  <th x-text="region"></th>
+                  <td class="table-value">
+                    <span x-text="formatNumber(getDoseCount('doseFirst', region))" ></span>
+                  </td>
+                  <td class="table-value text-muted">
+                    <small x-text="formatNumber(getDoseCount('doseFirst', region, getLastDayOnRecordMinusWeek()))"></small>
+                  </td>
+                  <td class="table-value">
+                    <span x-text="formatNumber(getDoseCount('doseSecond', region))" ></span>
+                  </td>
+                  <td class="table-value text-muted">
+                    <small x-text="formatNumber(getDoseCount('doseSecond', region, getLastDayOnRecordMinusWeek()))"></small>
+                  </td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+ 
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="p-3 text-center">
+    <hr>
+    <p class="text-muted">Táto nástenka zobrazuje štatistiky o stave vakcinácie proti ochoreniu covid-19 na Slovensku na základe dát <a href="https://github.com/Institut-Zdravotnych-Analyz/covid19-data" target="_blank" title="Inštitút Zdravotných Analýz" class="text-white">Inštitútu Zdravotných Analýz</a>. Dataset je načítaný pri otvorení stránky webovským prehliadačom, prípadne ho <a @click="loadData()" class="text-white">aktualizujte manuálne</a>
+      .</p>
+    <p class="text-muted">Webovskú stránku zapísal <a href="https://mravcak.com/" class="text-white" target="_blank">Alexander Mravčák</a> pomocou Alpine.js na <abbr title="stolový počítač">🖥</abbr>. Prejsť na <a href="https://github.com/mravcak/covid19-vaccination" target="_blank" class="text-white">GitHub</a>.</p>
+  </footer>
+
+  <script>
+    const removeQuotes = (str) => (str ? str.replace(/"/g, '') : null);
+
+    const parseCsv = (rawText) => rawText.split('\n').slice(1, -1).map((row) => {
+      const [date, region, regionCode, doseFirst, doseSecond] = row.split(';');
+      return {
+        date: dayjs(date),
+        region: removeQuotes(region),
+        regionCode: removeQuotes(regionCode),
+        doseFirst: parseInt(doseFirst, 10),
+        doseSecond: parseInt(doseSecond, 10),
+      };
+    });
+
+    const fetchRecords = async () => {
+      // const src = 'data-2020-01-26.csv';
+      const src = 'https://raw.githubusercontent.com/Institut-Zdravotnych-Analyz/covid19-data/main/OpenData_Slovakia_Vaccination_Regions.csv';
+      const data = await fetch(src);
+      const rawText = await data.text();
+      const parsed = parseCsv(rawText);
+
+      // console.log(parsed);
+      return parsed;
+    };
+
+    const epochStart = dayjs('1970-01-01');
+
+    const aplineApp = () => ({
+      // Props
+      records: [],
+      regions: [],
+      weeklyRate: 1000,
+      desiredImmunityPopulationRatio: 70,
+      population: 5464060,
+      lastDayOnRecord: epochStart,
+      // Mutations
+      async loadData() {
+        this.records = await fetchRecords();
+        this.identifyLastDayOnRecord();
+        this.identifyRegions();
+        this.identifyWeeklyRate();
+      },
+      identifyLastDayOnRecord() {
+        this.lastDayOnRecord = this.records.reduce(
+          (acc, cv) => (cv.date.isAfter(acc) ? cv.date : acc),
+          epochStart,
+        );
+      },
+      identifyRegions() {
+        this.regions = this.records.reduce(
+          (acc, cv) => (acc.includes(cv.region) ? acc : [...acc, cv.region]),
+          [],
+        );
+      },
+      identifyWeeklyRate() {
+        this.weeklyRate = this.getDoseCount(null, null, this.getLastDayOnRecordMinusWeek());
+      },
+      // Getters
+      getLastDayOnRecordMinusWeek() {
+        return this.lastDayOnRecord
+          ? this.lastDayOnRecord.subtract(7, 'day')
+          : epochStart;
+      },
+      getDoseCount(doseType = null, region = null, afterDate = null) {
+        return this.records.reduce((acc, cv) => {
+          const isRegionMatched = (region === null || region === cv.region);
+          const isDateMatched = (afterDate === null || cv.date.isAfter(afterDate) || cv.date.isSame(afterDate));
+          const currentCount = doseType ? cv[doseType] : cv.doseFirst + cv.doseSecond;
+          return (isRegionMatched && isDateMatched)
+            ? acc + currentCount
+            : acc;
+        }, 0);
+      },
+      getTotalDoseFirst() {
+        return this.getDoseCount('doseFirst');
+      },
+      getWeeklyDoseFirst() {
+        return this.getDoseCount('doseFirst', null, this.getLastDayOnRecordMinusWeek());
+      },
+      getTotalDoseSecond() {
+        return this.getDoseCount('doseSecond', null, this.getLastDayOnRecordMinusWeek());
+      },
+      getWeeklyDoseSecond() {
+        return this.getDoseCount('doseSecond', null, this.getLastDayOnRecordMinusWeek());
+      },
+      getDesiredVaccinatedPopulation() {
+        return this.population * (this.desiredImmunityPopulationRatio / 100);
+      },
+      getTotalProgress() {
+        return (this.getDoseCount() / 2) / this.getDesiredVaccinatedPopulation();
+      },
+      getDateOfImmunity() {
+        const getDosesToServe = () => {
+          const dosesNeeded = this.getDesiredVaccinatedPopulation() * 2;
+          const dosesServed = this.getDoseCount();
+          return dosesNeeded - dosesServed;
+        };
+        const dosesToServe = getDosesToServe();
+        const duration = dosesToServe / (this.weeklyRate / 7);
+        const durationRounded = Math.ceil(duration);
+        return this.lastDayOnRecord.add(durationRounded, 'day');
+      },
+      // Formatting functions
+      formatPercent(val) {
+        return val.toLocaleString('sk', {
+          style: 'percent',
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 4,
+        });
+      },
+      formatNumber(val) {
+        return val.toLocaleString('sk', {
+          style: 'decimal',
+          maximumFractionDigits: 0,
+        });
+      },
+    });
+  </script>
+
+</body>
+</html>

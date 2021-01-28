@@ -1,0 +1,30 @@
+{
+  "name": "covid19-vaccination",
+  "version": "1.0.0",
+  "description": "Dashboard showing stats on covid19 vaccination in Slovakia",
+  "main": "index.js",
+  "scripts": {
+    "dev": "reload -b",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://mravcak@github.com/mravcak/covid19-vaccination.git"
+  },
+  "keywords": [
+    "covid19",
+    "slovakia",
+    "vaccination",
+    "dashboard",
+    "alpine.js"
+  ],
+  "author": "Alexander Mravcak",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mravcak/covid19-vaccination/issues"
+  },
+  "homepage": "https://github.com/mravcak/covid19-vaccination#readme",
+  "dependencies": {
+    "reload": "^3.1.1"
+  }
+}
