@@ -34,7 +34,7 @@
           </div>
         </div>
         <hr>
-        <p class="text-muted text-center">Dáta môžu byť oneskorené.<br> Posledný deň = <code x-text="lastDayOnRecord && lastDayOnRecord.format('D.M.YYYY')"></code>. Posledný týždeň = od <code x-text="getLastDayOnRecordMinusWeek().format('D.M.YYYY')"></code></p> 
+        <p class="text-muted text-center">Dáta môžu byť oneskorené niekoľko dní.<br> Posledný deň = <strong x-text="lastDayOnRecord && lastDayOnRecord.format('D.M.YYYY')"></strong>. Posledný týždeň = od <strong x-text="getLastDayOnRecordMinusWeek().format('D.M.YYYY')"></strong></p> 
       </div>
 
       <div class="p-3 mb-3 shadow-lg bg-white text-dark">
@@ -263,8 +263,8 @@
       formatPercent(val) {
         return val.toLocaleString('sk', {
           style: 'percent',
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 4,
+          minimumFractionDigits: 1,
+          maximumFractionDigits: 2,
         });
       },
       formatNumber(val) {
